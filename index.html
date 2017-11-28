@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+
+    <input type="file" id="fileinput" class="select-file" onclick="refreshInterface()"/>
+
+    <script type="text/javascript">
+      var x;
+      var xTmp;
+      var tab;
+      var alreadyUsedWords = [];
+      function readSingleFile(evt) {
+        var file = evt.target.files[0];
+        if (file)
+        {
+          var read = new FileReader();
+          read.onload = function(e) {
+              var contents = e.target.result;
+              var ct = read.result;
+              tab = ct.split(';');
+            };
+            read.readAsText(file);
+          }
+          else
+          alert("Erreur lors de la lecture du fichier");
+          return tab;
+        };
+
+      function refreshInterface() {
+        //tab = [];
+        alreadyUsedWords = [];
+        document.getElementById('add-to-learn').style.display = "none";
+      }
+
+      function findWordIndex(index) {
+        return index == xTmp;
+      }
+
+      function displayWord() {
+        var size = alreadyUsedWords.length * 100 / ((tab.length - 1) / 2);
+
+        document.getElementById('add-to-learn').style.display = "block";
+        document.getElementById('progress-bar').style.width = size + "%";
+        x = Math.floor((Math.random() * tab.length));
+        xTmp = x;
+        if (alreadyUsedWords.length > (tab.length - 1) / 2)
+        {
+          document.getElementById('display-english-word').innerHTML = "C'est terminé !";
+          document.getElementById('display-answer').innerHTML = "C'est terminé !";
+          console.log(alreadyUsedWords.toString());
+          return ;
+        }
+        if (x % 2 == 0 && alreadyUsedWords.find(findWordIndex) === undefined)
+          alreadyUsedWords.push(x);
+        else
+          {
+            while (x % 2 != 0 || alreadyUsedWords.find(findWordIndex) !== undefined)
+            {
+              xTmp = Math.floor((Math.random() * tab.length));
+              if (alreadyUsedWords.find(findWordIndex) === undefined)
+                x = xTmp;
+            }
+            alreadyUsedWords.push(x);
+          }
+        document.getElementById('display-english-word').innerHTML = tab[x];
+        document.getElementById('display-answer').innerHTML = tab[x + 1];
+        document.getElementById('display-answer').style.display = "none";
+      }
+
+      function hideDisplay() {
+        var displayType = document.getElementById('display-answer').style.display;
+
+        if (displayType == "none")
+          document.getElementById('display-answer').style.display = "block";
+          else
+          document.getElementById('display-answer').style.display = "none";
+        }
+
+      document.body.onkeyup = function(evt) {
+          if(evt.keyCode == 40)
+            hideDisplay();
+          if (evt.keyCode == 39)
+            displayWord();
+      }
+
+      function addWhatToLearn() {
+        document.getElementById("display-what-to-learn").innerHTML += ('<li class=\"list-group-item\">'+tab[x]+" -> "+tab[x+1]+'</li>');
+      }
+
+      document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+
+    </script>
+  </head>
+<body>
+    <div class="jumbotron">
+      <h1>Vocabularizer</h1>
+      <p>Simply load a file from your computer with semicolon separated words (/!\ not at the end /!\) and randomly guess what is the translated one... Good luck !</p>
+    </div>
+    <div class="progress">
+      <div id="progress-bar" class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width:0%">
+      </div>
+    </div>
+    <div class="container">
+      <div class="well">
+      <div class="row">
+        <button class="btn btn-success btn-lg" onclick="displayWord()">Next Word</button>
+      </div>
+      <div class="row">
+        <div class="col-sm-8"/>
+          <h1 id="display-english-word"></h1>
+          <button id="add-to-learn" class="btn btn-warning btn-sm" onclick="addWhatToLearn()" style="display:none;">Learn it!</button>
+        </div>
+      </div>
+      </div>
+      <div class="well">
+      <div class="row">
+        <button class="btn btn-info btn-lg" onclick="hideDisplay()">Show Answer</button>
+      </div>
+      <div class="row">
+        <div class="col-sm-8">
+          <h1 id="display-answer" style="display:none;"></h1>
+        </div>
+      </div>
+      </div>
+      <div class="well">
+        <ul class="list-group" id="display-what-to-learn">
+          <h1>What To Learn</h1>
+        </ul>
+      </div>
+    </div>
+</body>
+</html>
